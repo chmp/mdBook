@@ -467,6 +467,9 @@ pub struct HtmlConfig {
     /// FontAwesome icon class to use for the Git repository link.
     /// Defaults to `fa-github` if `None`.
     pub git_repository_icon: Option<String>,
+    /// Directories to exclude when copying files relative to the src dir.
+    /// Defaults to `[".git"]` if `None`.
+    pub exclude: Option<Vec<PathBuf>>,
     /// This is used as a bit of a workaround for the `mdbook serve` command.
     /// Basically, because you set the websocket port from the command line, the
     /// `mdbook serve` command needs a way to let the HTML renderer know where

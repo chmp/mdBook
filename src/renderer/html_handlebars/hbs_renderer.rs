@@ -292,6 +292,7 @@ impl Renderer for HtmlHandlebars {
         let destination = &ctx.destination;
         let book = &ctx.book;
         let build_dir = ctx.root.join(&ctx.config.build.build_dir);
+        let avoid_dirs = make_avoid_dirs(&html_config, &src_dir, &build_dir);
 
         if destination.exists() {
             utils::fs::remove_dir_content(destination)
@@ -379,10 +380,23 @@ impl Renderer for HtmlHandlebars {
         }
 
         // Copy all remaining files, avoid a recursive copy from/to the book build dir
-        utils::fs::copy_files_except_ext(&src_dir, &destination, true, Some(&build_dir), &["md"])?;
+        utils::fs::copy_files_except_ext(&src_dir, &destination, true, Some(&avoid_dirs), &["md"])?;
 
         Ok(())
     }
+}
+
+fn make_avoid_dirs(config: &HtmlConfig, src_dir: &PathBuf, build_dir: &PathBuf) -> Vec<PathBuf> {
+    let mut result = Vec::new();
+
+    result.push(build_dir.clone());
+
+    let defaults = vec![PathBuf::from(".git")];
+    for p in config.exclude.as_ref().unwrap_or(&defaults) {
+        result.push(src_dir.join(p));
+    }
+
+    result
 }
 
 fn make_data(

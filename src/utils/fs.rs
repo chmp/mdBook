@@ -95,7 +95,7 @@ pub fn copy_files_except_ext(
     from: &Path,
     to: &Path,
     recursive: bool,
-    avoid_dir: Option<&PathBuf>,
+    avoid_paths: Option<&Vec<PathBuf>>,
     ext_blacklist: &[&str],
 ) -> Result<()> {
     debug!(
@@ -103,7 +103,7 @@ pub fn copy_files_except_ext(
         from.display(),
         to.display(),
         ext_blacklist,
-        avoid_dir
+        avoid_paths
     );
 
     // Check that from and to are different
@@ -121,8 +121,9 @@ pub fn copy_files_except_ext(
                 continue;
             }
 
-            if let Some(avoid) = avoid_dir {
-                if entry.path() == *avoid {
+            if let Some(avoid) = avoid_paths {
+                let entry = &entry.path();
+                if avoid.iter().any(|p| p == entry) {
                     continue;
                 }
             }
@@ -136,7 +137,7 @@ pub fn copy_files_except_ext(
                 &from.join(entry.file_name()),
                 &to.join(entry.file_name()),
                 true,
-                avoid_dir,
+                avoid_paths,
                 ext_blacklist,
             )?;
         } else if metadata.is_file() {
